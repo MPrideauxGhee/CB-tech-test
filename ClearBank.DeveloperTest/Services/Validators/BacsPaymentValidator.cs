@@ -6,7 +6,7 @@ namespace ClearBank.DeveloperTest.Services.Validators
     {
         public PaymentScheme Scheme => PaymentScheme.Bacs;
 
-        public bool IsValid(Account account, MakePaymentRequest request) => 
-            account?.AllowedPaymentSchemes.HasFlag(AllowedPaymentSchemes.Bacs) == true;
+        public bool IsValid(Account account, MakePaymentRequest request) =>
+            account.AllowedPaymentSchemes.HasFlag(AllowedPaymentSchemes.Bacs);
     }
 }

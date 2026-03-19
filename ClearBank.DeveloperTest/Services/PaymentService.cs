@@ -1,40 +1,46 @@
 ﻿using ClearBank.DeveloperTest.Services.Validators;
 using ClearBank.DeveloperTest.Types;
 using System.Collections.Generic;
-using System.Linq;
+using System.Transactions;
 
 namespace ClearBank.DeveloperTest.Services
 {
     public class PaymentService(
         IAccountDataStoreFactory dataStoreFactory,
-        IEnumerable<IPaymentSchemeValidator> validators) : IPaymentService
+        ITransactionService transactionService,
+        IReadOnlyDictionary<PaymentScheme, IPaymentSchemeValidator> validators) : IPaymentService
     {
         private readonly IAccountDataStoreFactory _dataStoreFactory = dataStoreFactory;
-        private readonly IReadOnlyDictionary<PaymentScheme, IPaymentSchemeValidator> _validators = validators.ToDictionary(v => v.Scheme);
+        private readonly ITransactionService _transactionService = transactionService;
+        private readonly IReadOnlyDictionary<PaymentScheme, IPaymentSchemeValidator> _validators = validators;
 
         public MakePaymentResult MakePayment(MakePaymentRequest request)
         {
             var dataStore = _dataStoreFactory.GetDataStore();
-
             var account = dataStore.GetAccount(request.DebtorAccountNumber);
 
-            var result = new MakePaymentResult
+            if (account == null)
             {
-                Success = false
-            };
-
-            if (_validators.TryGetValue(request.PaymentScheme, out var validator))
-            {
-                result.Success = validator.IsValid(account, request);
+                return new MakePaymentResult();
             }
 
-            if (result.Success)
+            var validator = _validators[request.PaymentScheme];
+
+            if (!validator.IsValid(account, request))
             {
-                account.Balance -= request.Amount;
-                dataStore.UpdateAccount(account);
+                return new MakePaymentResult();
             }
 
-            return result;
+            try
+            {
+                _transactionService.Execute(account, request.Amount, dataStore);
+            }
+            catch (TransactionException)
+            {
+                return new MakePaymentResult();
+            }
+
+            return new MakePaymentResult { Success = true };
         }
     }
 }

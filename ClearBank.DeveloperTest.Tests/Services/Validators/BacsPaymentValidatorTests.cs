@@ -8,12 +8,6 @@ namespace ClearBank.DeveloperTest.Tests.Services.Validators
         private readonly BacsPaymentValidator _validator = new();
         private readonly MakePaymentRequest _request = new();
 
-        [Fact]
-        public void IsValid_ShouldReturnFalse_WhenAccountIsNull()
-        {
-            _validator.IsValid(null, _request).Should().BeFalse();
-        }
-
         [Theory]
         [InlineData(AllowedPaymentSchemes.FasterPayments)]
         [InlineData(AllowedPaymentSchemes.Chaps)]

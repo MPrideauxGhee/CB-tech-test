@@ -1,30 +1,27 @@
 ﻿using ClearBank.DeveloperTest.Data;
 using ClearBank.DeveloperTest.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using ClearBank.DeveloperTest.Types;
+using Microsoft.Extensions.Options;
 namespace ClearBank.DeveloperTest.Tests.Services
 {
     public class AccountDataStoreFactoryTests
     {
         [Fact]
-        public void GetDataStore_WhenDataStoreTypeIsBackup_ReturnsBackupAccountDataStore()
+        public void GetDataStore_ShouldReturnBackupAccountDataStore_WhenDataStoreTypeIsBackup()
         {
-            var factory = new AccountDataStoreFactory("Backup");
+            var options = Options.Create(new DataStoreOptions { DataStoreType = "Backup" });
+            var factory = new AccountDataStoreFactory(options);
 
-            var result = factory.GetDataStore();
-
-            result.Should().BeOfType<BackupAccountDataStore>();
+            factory.GetDataStore().Should().BeOfType<BackupAccountDataStore>();
         }
 
         [Fact]
-        public void GetDataStore_WhenDataStoreTypeIsNotBackup_ReturnsAccountDataStore()
+        public void GetDataStore_ShouldReturnAccountDataStore_WhenDataStoreTypeIsNotBackup()
         {
-            var factory = new AccountDataStoreFactory("Primary");
+            var options = Options.Create(new DataStoreOptions { DataStoreType = "Primary" });
+            var factory = new AccountDataStoreFactory(options);
 
-            var result = factory.GetDataStore();
-
-            result.Should().BeOfType<AccountDataStore>();
+            factory.GetDataStore().Should().BeOfType<AccountDataStore>();
         }
     }
 }
