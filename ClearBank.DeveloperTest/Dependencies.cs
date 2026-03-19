@@ -27,8 +27,8 @@ namespace ClearBank.DeveloperTest
 
         private static void RegisterServices(IServiceCollection services)
         {
-            services.AddTransient<IPaymentService, PaymentService>();
-            services.AddTransient<ITransactionService, TransactionService>();
+            services.AddScoped<IPaymentService, PaymentService>();
+            services.AddScoped<ITransactionService, TransactionService>();
         }
 
         private static void RegisterValidators(IServiceCollection services)
